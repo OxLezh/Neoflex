@@ -132,7 +132,7 @@ def main():
             if df is not None:         
                 upload_to_csv(engine, df)   
     except:
-        print('****')
+        pass
         
     print("--- %s seconds ---" % (time.time() - start_time))
 
