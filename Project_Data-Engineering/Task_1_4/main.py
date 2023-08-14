@@ -12,10 +12,6 @@ load_dotenv(find_dotenv()) # Для использования переменн�
 # Переименуйте файл env_example.txt в .env и измените его содержимое в соответсвии со своими настройками для 
 # подключения к базе PostgreSQL.
 
-#Укажите необходимую дату проводки:
-
-date = '2018-01-09'
-
 # -----------------------------------------------------------------------------------------------------------------------------
 #ДЛЯ РАЗРАБОТЧИКОВ:
 
@@ -25,13 +21,6 @@ DB_HOST=getenv("DB_HOST")
 DB_PORT=getenv("DB_PORT")
 DB_USER=getenv("DB_USER")
 DB_PASSWORD=getenv("DB_PASSWORD")
-
-# Название таблиц, схем в PostgreSQL.
-schema = 'ds'
-table_name = 'ft_posting_f'
-schema2 = 'dm'
-function_name = 'func_ds_ft_posting_f'
-
   
 def logging(status, engine, description='', error=''):
 
@@ -48,7 +37,7 @@ def logging(status, engine, description='', error=''):
                           values ('{status}', '{description}', '{error}');"""))
         conn.commit()         
 
-def exist_table_function(engine):
+def exist_table_function(engine, schema, table_name, schema2, function_name):
 
     """ Проверка подключения к PostgreSQL, существования таблицы с данными, функции. """   
     try: 
@@ -84,7 +73,7 @@ def exist_table_function(engine):
         print(f'ОШИБКА соединения c PostgreSQL: \n {sys.exc_info()}\n')
 
  
-def start_function(engine):
+def start_function(engine, schema, table_name, schema2, function_name, date):
 
     """ Функция в PostgreSQL принимает дату и возвращает эту дату и информацию о максимальной и минимальной сумме проводки 
         по кредиту и по дебету за переданную дату """   
@@ -105,7 +94,7 @@ def start_function(engine):
         print(f'Ошибка работы функции {schema2}.{function_name} PostgreSQL: \n {sys.exc_info()}')        
 
 
-def upload_to_csv(engine, df):
+def upload_to_csv(engine, df, date, function_name):
      
     """ Загрузка данных в csv файл. """   
     try:          
@@ -121,16 +110,21 @@ def upload_to_csv(engine, df):
         print(f"Ошибка загрузки данных в файл {function_name}.csv.", str(sys.exc_info()).replace("'", '') ) 
 
 
-def main():
+def main(date):
 
-    start_time = time.time() 
+    start_time = time.time()    
+    # Название таблиц, схем в PostgreSQL.
+    schema = 'ds'
+    table_name = 'ft_posting_f'
+    schema2 = 'dm'
+    function_name = 'func_ds_ft_posting_f'
     try:
         engine = create_engine(f'postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}')
-        exis_table, exis_function, data_empty = exist_table_function(engine)    
+        exis_table, exis_function, data_empty = exist_table_function(engine, schema, table_name, schema2, function_name)         
         if exis_table is True and exis_function is True and data_empty != None: 
-            df = start_function(engine)
+            df = start_function(engine, schema, table_name, schema2, function_name, date)
             if df is not None:         
-                upload_to_csv(engine, df)   
+                upload_to_csv(engine, df, date, function_name)    
     except:
         pass
         
@@ -138,4 +132,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main( '2018-01-09')

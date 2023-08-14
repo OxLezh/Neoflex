@@ -40,7 +40,7 @@ def logging(status, engine, description='', error=''):
                           values ('{status}', '{description}', '{error}');"""))        
         conn.commit()         
 
-def exist_table(engine):
+def exist_table(engine, schema, table_name):
 
     """ Проверка подключения к PostgreSQL, существования таблиц """   
     try:        
@@ -60,7 +60,7 @@ def exist_table(engine):
         print(f'ОШИБКА соединения c PostgreSQL: \n {sys.exc_info()}\n')
  
 
-def extract_PostgreSQL(engine):
+def extract_PostgreSQL(engine, schema, table_name):
 
     """ Извлечение данных из PostgreSQL. """   
     try:
@@ -78,7 +78,7 @@ def extract_PostgreSQL(engine):
         print(f'Ошибка извлечения данных из таблицы {schema}.{table_name} PostgreSQL: \n {sys.exc_info()}')
   
 
-def upload_to_csv(engine, df):
+def upload_to_csv(engine, df, table_name):
      
     """ Загрузка данных в csv файл. """   
     try:
@@ -91,7 +91,7 @@ def upload_to_csv(engine, df):
         print(f"Ошибка загрузки данных в файл {table_name}.csv.", str(sys.exc_info()).replace("'", '') ) 
 
 
-def upload_PostgreSQL(engine):
+def upload_PostgreSQL(engine, schema, table_name, copy_table_name):
 
     """ Загрузка данных из .csv в PostgreSQL. """        
     try:
