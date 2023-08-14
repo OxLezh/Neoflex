@@ -13,15 +13,7 @@ load_dotenv(find_dotenv()) # Для использования переменн�
 # подключения к базе PostgreSQL.
 
 # -----------------------------------------------------------------------------------------------------------------------------
-#ДЛЯ РАЗРАБОТЧИКОВ:
-
-#Переменные окружения для PostgreSQL:
-DB_NAME = getenv("DB_NAME")
-DB_HOST=getenv("DB_HOST")
-DB_PORT=getenv("DB_PORT")
-DB_USER=getenv("DB_USER")
-DB_PASSWORD=getenv("DB_PASSWORD")
-  
+ 
 def logging(status, engine, description='', error=''):
 
     """ Загрузка данных в таблицу логов. """   
@@ -118,6 +110,14 @@ def main(date):
     table_name = 'ft_posting_f'
     schema2 = 'dm'
     function_name = 'func_ds_ft_posting_f'
+
+    #Переменные окружения для PostgreSQL:
+    DB_NAME = getenv("DB_NAME")
+    DB_HOST=getenv("DB_HOST")
+    DB_PORT=getenv("DB_PORT")
+    DB_USER=getenv("DB_USER")
+    DB_PASSWORD=getenv("DB_PASSWORD")
+
     try:
         engine = create_engine(f'postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}')
         exis_table, exis_function, data_empty = exist_table_function(engine, schema, table_name, schema2, function_name)         
