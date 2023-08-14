@@ -8,9 +8,7 @@ from pathlib import Path
 load_dotenv(find_dotenv()) # Для использования переменных окружения.
 
 
-def logging(status, engine, description='', error=''):
-
-    """ Загрузка данных в таблицу логов. """   
+def сreate_table(engine):
 
     with engine.connect() as conn:   
         #Создание таблицы для логов.
@@ -18,12 +16,21 @@ def logging(status, engine, description='', error=''):
                                 action_date timestamp not null default now(),
                                 status varchar(40),
                                 description text,
-                                error text);"""))    
+                                error text);"""))         
+        conn.commit()  
+
+
+def logging(status, engine, description='', error=''):
+
+    """ Загрузка данных в таблицу логов. """   
+
+    with engine.connect() as conn:             
         conn.execute(text(f"""insert into logs.extract_function_logs (status, description, error)
                           values ('{status}', '{description}', '{error}');"""))
         conn.commit()         
 
-def exist_table_function(engine, schema, table_name, schema2, function_name):
+
+def exist_object(engine, schema, table_name, schema2, function_name):
 
     """ Проверка подключения к PostgreSQL, существования таблицы с данными, функции. """   
     try: 
@@ -35,7 +42,7 @@ def exist_table_function(engine, schema, table_name, schema2, function_name):
                                             where table_schema = '{schema}' 
                                             and table_name = '{table_name}')""")).first()[0] 
             #Проверка наличия данных в таблице.
-            data = conn.execute(text(f"""select * from ds.ft_posting_f;""")).first()                      
+            data = conn.execute(text(f"""select * from ds.ft_posting_f;""")).first()                              
             #Проверка существования функции.   
             exist_function =  conn.execute(text(f"""select exists
                                             (select * 
@@ -43,15 +50,15 @@ def exist_table_function(engine, schema, table_name, schema2, function_name):
                                             where proname = '{function_name}')""")).first()[0]          
             conn.commit()                          
             if exist_table is False:
-                logging('error_exist_table', engine, f'Таблицы {schema}.{table_name} не существует.')
+                logging('error_exist_object', engine, f'Таблицы {schema}.{table_name} не существует.')
                 print(f"\nТаблицы c данными {schema}.{table_name} в PostgreSQL не существует.\n")                          
            
             elif exist_function is False:
-                logging('error_exist_table', engine, f'Функции {schema2}.{function_name} не существует.')
+                logging('error_exist_object', engine, f'Функции {schema2}.{function_name} не существует.')
                 print(f"\nФункции {schema2}.{function_name} не существует.\n")
 
             elif data == None:
-                logging('error_exist_table', engine, f'Нет данных в таблице  {schema}.{table_name}.')
+                logging('error_exist_object', engine, f'Нет данных в таблице  {schema}.{table_name}.')
                 print(f'\nНет данных в таблице  {schema}.{table_name}.\n')  
             
             return exist_table, exist_function, data
@@ -112,9 +119,11 @@ def main(date):
     DB_USER=getenv("DB_USER")
     DB_PASSWORD=getenv("DB_PASSWORD")
 
+    engine = create_engine(f'postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}')
+
     try:
-        engine = create_engine(f'postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}')
-        exis_table, exis_function, data_empty = exist_table_function(engine, schema, table_name, schema2, function_name)         
+        сreate_table(engine)        
+        exis_table, exis_function, data_empty = exist_object(engine, schema, table_name, schema2, function_name)         
         if exis_table is True and exis_function is True and data_empty != None: 
             df = start_function(engine, schema, table_name, schema2, function_name, date)
             if df is not None:         
