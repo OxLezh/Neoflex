@@ -37,14 +37,20 @@ def logging(status, engine, description='', error=''):
 
     """ Загрузка данных в таблицу логов. """   
 
-    with engine.connect() as conn:       
+    with engine.connect() as conn:   
+        #Создание таблицы для логов.
+        conn.execute(text(f"""create table if not exists logs.extract_function_logs(
+                                action_date timestamp not null default now(),
+                                status varchar(40),
+                                description text,
+                                error text);"""))    
         conn.execute(text(f"""insert into logs.extract_function_logs (status, description, error)
                           values ('{status}', '{description}', '{error}');"""))
         conn.commit()         
 
-def exist_table(engine):
+def exist_table_function(engine):
 
-    """ Проверка подключения к PostgreSQL, существования таблицы с данными, функции, создание таблицы логов. """   
+    """ Проверка подключения к PostgreSQL, существования таблицы с данными, функции. """   
     try: 
         #Проверка существования таблицы с данными.       
         with engine.connect() as conn:            
@@ -59,13 +65,7 @@ def exist_table(engine):
             exist_function =  conn.execute(text(f"""select exists
                                             (select * 
                                             from pg_proc 
-                                            where proname = '{function_name}')""")).first()[0]            
-            #Создание таблицы для логов.
-            conn.execute(text(f"""create table if not exists logs.extract_function_logs(
-                                    action_date timestamp not null default now(),
-                                    status varchar(40),
-                                    description text,
-                                    error text);"""))
+                                            where proname = '{function_name}')""")).first()[0]          
             conn.commit()                          
             if exist_table is False:
                 logging('error_exist_table', engine, f'Таблицы {schema}.{table_name} не существует.')
@@ -79,7 +79,7 @@ def exist_table(engine):
                 logging('error_exist_table', engine, f'Нет данных в таблице  {schema}.{table_name}.')
                 print(f'\nНет данных в таблице  {schema}.{table_name}.\n')  
             
-            return exist_table,exist_function, data
+            return exist_table, exist_function, data
     except:       
         print(f'ОШИБКА соединения c PostgreSQL: \n {sys.exc_info()}\n')
 
@@ -126,7 +126,7 @@ def main():
     start_time = time.time() 
     try:
         engine = create_engine(f'postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}')
-        exis_table, exis_function, data_empty = exist_table(engine)    
+        exis_table, exis_function, data_empty = exist_table_function(engine)    
         if exis_table is True and exis_function is True and data_empty != None: 
             df = start_function(engine)
             if df is not None:         

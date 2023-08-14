@@ -29,14 +29,20 @@ file_to_open = Path("Project_Data-Engineering/Task_1_3/data")/ f"{table_name}.cs
 def logging(status, engine, description='', error=''):
 
     """ Загрузка данных в таблицу логов. """   
-    with engine.connect() as conn:       
+    with engine.connect() as conn:
+        #Создание таблицы логов         
+        conn.execute(text(f"""create table if not exists logs.extract_load_logs(
+                                action_date timestamp not null default now(),
+                                status varchar(40),
+                                description text,
+                                error text);"""))          
         conn.execute(text(f"""insert into logs.extract_load_logs (status, description, error)
-                          values ('{status}', '{description}', '{error}');"""))
+                          values ('{status}', '{description}', '{error}');"""))        
         conn.commit()         
 
 def exist_table(engine):
 
-    """ Проверка подключения к PostgreSQL, существования таблиц, создание таблицы логов. """   
+    """ Проверка подключения к PostgreSQL, существования таблиц """   
     try:        
         with engine.connect() as conn:           
             #Проверка существования таблицы с  данными     
@@ -44,13 +50,7 @@ def exist_table(engine):
                                             select * 
                                             from information_schema.tables
                                             where table_schema = '{schema}' 
-                                            and table_name = '{table_name}')""")).first()[0]    
-            #Создание таблицы логов         
-            conn.execute(text(f"""create table if not exists logs.extract_load_logs(
-                                    action_date timestamp not null default now(),
-                                    status varchar(40),
-                                    description text,
-                                    error text);"""))   
+                                            and table_name = '{table_name}')""")).first()[0]                
             conn.commit()                          
             if exist_table is False:
                 logging('error_exist_table', engine, f'Таблицы {schema}.{table_name} не существует.')
