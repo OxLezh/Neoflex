@@ -50,7 +50,8 @@ def logging(status, engine, description='', error=''):
         conn.execute(text(f"""insert into logs.extract_load_logs (status, description, error)
                           values ('{status}', '{description}', '{error}');"""))        
         conn.commit()
-        conn.close()          
+        conn.close()       
+           
 
 def exist_table(engine, schema, table_name):
     """
@@ -67,12 +68,12 @@ def exist_table(engine, schema, table_name):
             if data != None:
                 return True  
             else:
-                logging('error_exist_table', engine,  f'ОШИБКА. В таблице {schema}.{table_name} отстутсвуют данные.', '') 
+                logging('error_exist_table', engine,  f'ОШИБКА. В витрине {schema}.{table_name} отстутсвуют данные.', '') 
                 print(f'ОШИБКА. В витрине {schema}.{table_name} отстутсвуют данные.\n')  
         conn.close()                             
         if not exist_table:
-            logging('error_exist_table', engine, f'Таблицы {schema}.{table_name} не существует.')
-            print(f"Витрины {schema}.{table_name} в PostgreSQL не существует.\n")              
+            logging('error_exist_table', engine, f'ОШИБКА. Витрины {schema}.{table_name} не существует.')
+            print(f"ОШИБКА. Витрины {schema}.{table_name} в PostgreSQL не существует.\n")              
         
 
 def extract_PostgreSQL(engine, schema, table_name):
@@ -96,18 +97,22 @@ def upload_to_csv(engine, df, table_name, file_to_open):
 
 def upload_PostgreSQL(engine, schema, table_name, copy_table_name, file_to_open):
     """
-    Загрузка данных из .csv в PostgreSQL.
-    """    
-    df = pd.read_csv(file_to_open, delimiter=';', encoding='utf-8')     
-    with engine.connect() as conn:       
-        conn.execute(text(f"""drop table if exists {schema}.{copy_table_name};"""))
-        conn.execute(text(f"""create table if not exists {schema}.{copy_table_name} as table {schema}.{table_name} with no data;"""))
-        conn.commit()     
-        conn.close() 
-    df.to_sql(copy_table_name, engine, if_exists='append', schema=schema, index=False)   
-    logging('upload_PostgreSQL', engine, f'Данные в таблицу {schema}{copy_table_name} успешно загружены.')
-    print(f'Данные в таблицу {schema}.{copy_table_name} загружены.\n') 
-    
+    Выгрузка данных из .csv в PostgreSQL.
+    """  
+    try:
+        df = pd.read_csv(file_to_open, delimiter=';', encoding='utf-8')
+        with engine.connect() as conn:       
+            conn.execute(text(f"""drop table if exists {schema}.{copy_table_name};"""))
+            conn.execute(text(f"""create table if not exists {schema}.{copy_table_name} as table {schema}.{table_name} with no data;"""))
+            conn.commit()     
+            conn.close() 
+        df.to_sql(copy_table_name, engine, if_exists='append', schema=schema, index=False)   
+        logging('upload_PostgreSQL', engine, f'Данные в таблицу {schema}{copy_table_name} успешно загружены.')
+        print(f'Данные в таблицу {schema}.{copy_table_name} загружены.\n') 
+    except:
+        logging('error_upload_PostgreSQL', engine, f'ОШИБКА выгрузки данных из файла .csv.')
+        print(f"ОШИБКА выгрузки данных из файла .csv.\n") 
+
 
 def main():
     """

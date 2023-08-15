@@ -128,7 +128,7 @@ def date_validation():
             datetime.datetime.strptime(date, '%Y-%m-%d')       
             return date
         except:
-            print("Некорректный формат даты.")
+            print("\nНекорректный формат даты.\n")
             
 
 def main():
