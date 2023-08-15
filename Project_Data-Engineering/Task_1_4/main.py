@@ -10,9 +10,9 @@ load_dotenv(find_dotenv()) # Для использования переменн�
 
 
 def connect_postgreSQL():
-
-    """Провека подключения к PosgreSQL"""
-
+    """
+    Провека подключения к PosgreSQL
+    """
     DB_NAME = getenv("DB_NAME")
     DB_HOST=getenv("DB_HOST")
     DB_PORT=getenv("DB_PORT")
@@ -30,9 +30,9 @@ def connect_postgreSQL():
 
 
 def сreate_table_logging(engine):
-    
-    """ Создание таблицы логов. """
-
+    """
+    Создание таблицы логов.
+    """
     with engine.connect() as conn:          
         conn.execute(text(f"""create table if not exists logs.extract_function_logs(
                                 action_date timestamp not null default now(),
@@ -44,9 +44,9 @@ def сreate_table_logging(engine):
 
 
 def logging(status, engine, description='', error=''):
-
-    """ Загрузка данных в таблицу логов. """   
-
+    """
+    Загрузка данных в таблицу логов.
+    """   
     with engine.connect() as conn:             
         conn.execute(text(f"""insert into logs.extract_function_logs (status, description, error)
                           values ('{status}', '{description}', '{error}');"""))
@@ -55,9 +55,9 @@ def logging(status, engine, description='', error=''):
 
 
 def exist_table(engine, schema, table_name):
-
-    """ Проверка существования таблицы в PostgreSQL и данных в ней. """   
-    
+    """
+    Проверка существования таблицы в PostgreSQL и данных в ней.
+    """   
     #Проверка существования таблицы с данными.       
     with engine.connect() as conn:            
         exist_table =  conn.execute(text(f"""select exists
@@ -80,9 +80,9 @@ def exist_table(engine, schema, table_name):
          
       
 def exist_function(engine, schema2, function_name):
-
-    """  Проверка cуществования функции в PostgreSQL. """   
-    
+    """
+    Проверка cуществования функции в PostgreSQL.
+    """    
     #Проверка существования таблицы с данными.       
     with engine.connect() as conn:           
         exist_function =  conn.execute(text(f"""select exists
@@ -98,11 +98,11 @@ def exist_function(engine, schema2, function_name):
 
 
 def start_function(engine, schema, table_name, schema2, function_name, date):
-
-    """ Функция в PostgreSQL принимает дату и возвращает эту дату и информацию о максимальной и минимальной сумме проводки 
-        по кредиту и по дебету за переданную дату """   
-  
-        #Создание датафрейма и извлечение данных с использованием функции в PostgreSQL.
+    """
+    Функция в PostgreSQL - принимает дату и возвращает дату, информацию о максимальной и минимальной сумме проводки 
+    по кредиту и по дебету за эту дату.
+    """     
+    #Создание датафрейма и извлечение данных с использованием функции в PostgreSQL.
     df = pd.read_sql_query(f"""select * from {schema2}.{function_name}('{date}')""", con=engine)
     #Проверка, что в датафрейме есть данные.          
     if not df.empty:                 
@@ -115,9 +115,9 @@ def start_function(engine, schema, table_name, schema2, function_name, date):
 
 
 def upload_to_csv(engine, df, date, function_name):
-     
-    """ Загрузка данных в csv файл. """   
-            
+    """
+    Загрузка данных в csv файл.
+    """           
     # Путь к файлу .csv и его название
     file_to_open = Path("Project_Data-Engineering/Task_1_4/data")/ f"{date}_{function_name}.csv" 
     #Запись данных в файл .csv
@@ -127,9 +127,9 @@ def upload_to_csv(engine, df, date, function_name):
 
 
 def date_validation():
-
-    """Проверка корректности даты"""
-
+    """
+    Проверка корректности даты.
+    """
     date = input(f'Введите дату проводки в формате 2018-01-01: ')
     try:
         datetime.datetime.strptime(date, '%Y-%m-%d')       
@@ -139,7 +139,9 @@ def date_validation():
 
 
 def main():
-
+    """
+    Запуск программы.
+    """
     start_time = time.time()    
     # Название таблиц, схем в PostgreSQL.
     schema = 'ds'
