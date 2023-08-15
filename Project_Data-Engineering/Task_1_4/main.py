@@ -65,6 +65,7 @@ def exist_table(engine, schema, table_name):
                                         from information_schema.tables
                                         where table_schema = '{schema}' 
                                         and table_name = '{table_name}')""")).first()[0] 
+        print((exist_table))
         #Проверка наличия данных в таблице.
         if exist_table:
             data = conn.execute(text(f"""select * from {schema}.{table_name};""")).first()   
