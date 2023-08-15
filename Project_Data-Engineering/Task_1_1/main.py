@@ -18,9 +18,7 @@ def connect_postgreSQL():
     DB_PORT=getenv("DB_PORT")
     DB_USER=getenv("DB_USER")
     DB_PASSWORD=getenv("DB_PASSWORD")
-
     engine = create_engine(f'postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}')
-
     try:
         engine.connect()
         print("\nПодключение к PostgreSQL успешно.\n") 
@@ -43,6 +41,7 @@ def сreate_table_logging(engine):
         conn.commit() 
         conn.close() 
 
+
 def logging(table_name, status, engine, description='', error=''):
     """ 
     Загрузка данных в таблицу логов.
@@ -52,6 +51,7 @@ def logging(table_name, status, engine, description='', error=''):
                             values ('{table_name}', '{status}', '{description}', '{error}');"""))
         conn.commit()
         conn.close()          
+
 
 def exist_table(table_name, engine, schema):
     """
@@ -70,16 +70,15 @@ def exist_table(table_name, engine, schema):
             print(f"Таблицы c данными {schema}.{table_name} в PostgreSQL не существует.\n")  
     return exist_table
 
+
 def extract_data(table_name, engine, path):
     """
     Извлечение данных из csv файлов.
     """   
-    try:
-        
+    try:        
         df = pd.read_csv(f'{path}/{table_name}.csv', delimiter=';', encoding='cp866', keep_default_na=False)
         df.columns = df.columns.str.lower()
         df = df.iloc[:, 1:len(df.axes[1])]  # Выбираем только нужные колонки.
-
         if table_name == 'ft_posting_f':
             df = df.groupby(['oper_date', 'credit_account_rk','debet_account_rk'])[['credit_amount', 'debet_amount']].sum().reset_index()
         elif table_name == 'md_exchange_rate_d':
@@ -90,14 +89,15 @@ def extract_data(table_name, engine, path):
     except:
         logging(table_name, 'error_extract', engine,  f'ОШИБКА извлечения данных из файла {table_name}.csv', str(sys.exc_info()).replace("'", '')) 
         print(f'Ошибка извлечения данных из файла {table_name}.csv: \n {sys.exc_info()}')
-  
+    
+      
 def upload_data(table_name, engine, df):
     """
     Загрузка данных из датафрейма в PostgreSQL.
     """    
     try:        
         logging(table_name, 'start_upload', engine, f'Старт загрузки данных в таблицу {table_name}')
-        time.sleep(5)        
+        time.sleep(2)        
         with engine.connect() as conn:
             # Получаем список первичных ключей:
             column_pk_q =  conn.execute(text(f"""SELECT c.column_name
