@@ -5,7 +5,6 @@ from os import getenv
 from dotenv import load_dotenv, find_dotenv #(python-dotenv)
 import sys
 from pathlib import Path
-import datetime
 load_dotenv(find_dotenv()) # Для использования переменных окружения.
 
 
