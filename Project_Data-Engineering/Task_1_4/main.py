@@ -13,6 +13,7 @@ def connect_postgreSQL():
     """
     Провека подключения к PosgreSQL
     """
+    #Переменные окружения
     DB_NAME = getenv("DB_NAME")
     DB_HOST=getenv("DB_HOST")
     DB_PORT=getenv("DB_PORT")
