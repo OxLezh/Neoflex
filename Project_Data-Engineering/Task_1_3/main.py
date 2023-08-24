@@ -5,21 +5,23 @@ from os import getenv
 from dotenv import load_dotenv, find_dotenv #(python-dotenv)
 import sys
 from pathlib import Path
-load_dotenv(find_dotenv()) # Для использования переменных окружения.
+
 
 
 def connect_postgreSQL():
     """
     Провека подключения к PosgreSQL.
     """
-    #Переменные окружения
-    DB_NAME = getenv("DB_NAME")
-    DB_HOST=getenv("DB_HOST")
-    DB_PORT=getenv("DB_PORT")
-    DB_USER=getenv("DB_USER")
-    DB_PASSWORD=getenv("DB_PASSWORD")
-    engine = create_engine(f'postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}')
     try:
+        # Для использования переменных окружения.
+        load_dotenv(find_dotenv()) 
+        # Переменные окружения
+        DB_NAME = getenv("DB_NAME")
+        DB_HOST=getenv("DB_HOST")
+        DB_PORT=getenv("DB_PORT")
+        DB_USER=getenv("DB_USER")
+        DB_PASSWORD=getenv("DB_PASSWORD")
+        engine = create_engine(f'postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}')
         engine.connect()
         print("\nПодключение к PostgreSQL успешно.\n") 
         return engine  
