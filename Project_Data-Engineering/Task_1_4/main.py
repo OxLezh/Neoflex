@@ -144,8 +144,8 @@ def main():
     schema2 = 'dm'
     function_name = 'func_ds_ft_posting_f'
     engine = connect_postgreSQL()
-    сreate_table_logging(engine)   
-    if engine:                   
+    if engine:  
+        сreate_table_logging(engine)                 
         if exist_table(engine, schema, table_name):  
             if exist_function(engine, schema2, function_name):
                 date = date_validation()    
