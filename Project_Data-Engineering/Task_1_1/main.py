@@ -74,12 +74,12 @@ def exist_table(table_name, engine, schema):
     return exist_table
 
 
-def extract_data(table_name, engine, path):
+def extract_data(table_name, engine):
     """
     Извлечение данных из csv файлов.
     """
     try:
-        df = pd.read_csv(f'{path}/{table_name}.csv', delimiter=';',
+        df = pd.read_csv(f"{Path(sys.path[0],'data', table_name)}.csv", delimiter=';',
                          encoding='cp866', keep_default_na=False)
         df.columns = df.columns.str.lower()
         df = df.iloc[:, 1:len(df.axes[1])]  # Выбираем только нужные колонки.
@@ -152,8 +152,7 @@ def main():
         "md_exchange_rate_d",
         "md_ledger_account_s"
     ]
-    schema = 'ds'
-    path = Path("Project_Data-Engineering/Task_1_1/data")
+    schema = 'ds'   
     start_time = time.time()
     engine = connect_postgreSQL()
 
@@ -161,7 +160,7 @@ def main():
         сreate_table_logging(engine)
         for name in tables_name:
             if exist_table(name, engine, schema):
-                df = extract_data(name, engine, path)
+                df = extract_data(name, engine)
                 if df is not None:
                     upload_data(name, engine, df)
     print("--- %s seconds ---" % (time.time() - start_time))
