@@ -123,7 +123,7 @@ def main():
     table_name = 'dm_f101_round_f'
     copy_table_name = 'dm_f101_round_f_2'
     # Путь к файлу.
-    file_to_open = Path("Project_Data-Engineering/Task_1_3/data")/ f"{table_name}.csv"    
+    file_to_open = f"{Path(sys.path[0],'data', table_name)}.csv"  
     keyboard_input = 0
     while keyboard_input not in [1,2,3]: 
         try:
