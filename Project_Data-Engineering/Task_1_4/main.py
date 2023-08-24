@@ -113,7 +113,7 @@ def upload_to_csv(engine, df, date, function_name):
     """
     Загрузка данных в csv файл.
     """           
-    file_to_open = Path("Project_Data-Engineering/Task_1_4/data")/ f"{date}_{function_name}.csv"    
+    file_to_open = f"{Path(sys.path[0],'data', f'{date}_{function_name}')}.csv"     
     df.to_csv(file_to_open, sep=';', encoding='utf-8', index=False)          
     logging('upload_to_csv', engine, f'Данные успешно загружены в файл {function_name}.csv.')
     print(f'Данные загружены в файл {function_name}.csv.\n')      
