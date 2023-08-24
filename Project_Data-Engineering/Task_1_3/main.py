@@ -7,7 +7,6 @@ import sys
 from pathlib import Path
 
 
-
 def connect_postgreSQL():
     """
     Провека подключения к PosgreSQL.
