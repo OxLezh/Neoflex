@@ -32,4 +32,4 @@ pip install -r requirements.txt
 
 * _ubuntu_commands_install_spark.txt_ - пример с командами по установке и первичной настройке spark.
 
-* _Pyspark_Simple_example.txt_ - пример python-крипта с pyspark.
+* _Pyspark_Simple_example.txt_ - пример python-cкрипта с pyspark.
