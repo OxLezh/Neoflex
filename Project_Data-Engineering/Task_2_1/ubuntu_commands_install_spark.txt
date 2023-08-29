@@ -1,0 +1,89 @@
+sudo apt install python3-pip
+
+pip3 install jupyter
+
+jupyter notebook
+
+[shutdown]
+
+sudo apt-get update
+
+sudo apt-get install default-jre
+
+java -version
+
+sudo apt-get install scala
+
+scala -version
+
+pip3 install py4j
+
+>>sudo apt-get install default-jre
+переместить в Home
+
+>> скачать spark-3.1.1-bin-hadoop3.2.tgz
+>> разорхивировать
+sudo tar -zxvf spark-3.1.1-bin-hadoop3.2.tgz
+
+#export SPARK_HOME='/home/andrey/spark-3.1.1-bin-hadoop3.2'
+export SPARK_HOME='/home/andrey/spark-2.4.4-bin-hadoop2.7'
+
+export PATH=$SPARK_HOME/bin:$PATH
+
+export PYTHONPATH=$SPARK_HOME/python:$PYTHONPATH
+
+#export PYSPARK_DRIVER_PYTHON="jupyter"
+
+#export PYSPARK_DRIVER_PYTHON_OPTS="notebook"
+
+#export PYSPARK_PYTHON=python3
+
+nano ~/.bashrc
+[copy all comands creating os variables]
+[# - optional]
+
+sudo chmod 777 spark-3.1.1-bin-hadoop3.2
+sudo chmod -R 777 spark-3.1.1-bin-hadoop3.2
+
+cd spark-3.1.1-bin-hadoop3.2
+
+cd python
+
+python3
+
+>>> import pyspark
+>>> quit()
+
+cd spark-3.1.1-bin-hadoop3.2
+sudo chmod 777 python
+
+cd python
+sudo chmod 777 pyspark
+
+jupyter notebook
+
+[New > python3]
+import pyspark
+
+[shutdown]
+cd
+
+#Настройка PySpark
+
+pip3 install findsparkcd
+cd spark-3.1.1-bin-hadoop3.2
+pwd
+>/home/andrey/spark-3.1.1-bin-hadoop3.2
+python3
+
+>>>import findspark
+>>>finspark.init('/home/andrey/spark-3.1.1-bin-hadoop3.2')
+>>>import pyspark
+>>>quit()
+
+jupyter notebook
+[New > python3]
+[ввести]
+>>>import findspark
+>>>finspark.init('/home/andrey/spark-3.1.1-bin-hadoop3.2')
+>>>import pyspark

@@ -1,0 +1,38 @@
+import findspark
+findspark.init('/home/andrey/spark-3.1.1-bin-hadoop3.2')
+
+import pyspark
+from pyspark.sql import SparkSession 
+
+
+print("<<---***--- START ---***--->>")
+
+spark = (SparkSession
+ .builder
+ .appName('pyspark_example')
+ .enableHiveSupport()
+ .getOrCreate())
+ 
+rows = [
+(1,"Tom", "Green", "Washington"),(2,"Alice", "Black", "Washington"),
+(3,"Jimmy", "Kimmel", "Texas"), (4,"Bob", "White", "Texas"),
+(5,"Kenny", "West", "Atlanta"), (6,"Kate", "Tompson", "Texas")
+]
+
+print(type(rows))
+print(rows[1])
+print(type(rows[1]))
+
+schema = "customer_id BIGINT, fname STRING, lname STRING, state STRING"
+customersDF = spark.createDataFrame(rows, schema)
+customersDF.show()
+
+customersDF.createOrReplaceTempView("tmp_clients")
+
+clientsDF = spark.sql("""
+select distinct state as states from tmp_clients
+""")
+
+clientsDF.show()
+
+print("<<---***--- END ---***--->>")
