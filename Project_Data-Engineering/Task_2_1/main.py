@@ -19,9 +19,11 @@ def sparksession():
 
 def create_df_discipline(spark):
     """
-    Генерирует DataFrame из трёх колонок (row_id, discipline, season) - олимпийские дисциплины по сезонам.
+    Генерирует DataFrame из трёх колонок (row_id, discipline, season)
+    - олимпийские дисциплины по сезонам.
         * row_id - число порядкового номера строки;
-        * discipline - наименование олимпиский дисциплины на английском (полностью маленькими буквами);
+        * discipline - наименование олимпиский дисциплины 
+            на английском (полностью маленькими буквами);
         * season - сезон дисциплины (summer / winter);
     """
     rows = [
@@ -46,7 +48,8 @@ def write_to_csv(df_discipline, file_path):
         * разделитель колонок табуляция
         * первая строка содержит название колонок.
     """
-    df_discipline.coalesce(1).write.mode("overwrite").options(header='True', delimiter='\t').csv(f"{file_path}.csv")
+    df_discipline.coalesce(1).write.mode("overwrite")\
+        .options(header='True', delimiter='\t').csv(f"{file_path}.csv")
     print("write_to_csv - success")
     
 
@@ -55,8 +58,9 @@ def read_from_csv(spark, file_path):
     Читает данные из файла .csv и создает DataFrame.
     """
     try:
-        df_athletes = spark.read.options(header='True', delimiter=';', inferSchema='True')\
-        .csv(f"{file_path}.csv")    
+        df_athletes = spark.read\
+            .options(header='True', delimiter=';', inferSchema='True')\
+            .csv(f"{file_path}.csv")    
         return df_athletes
     except:
         print(f"ERROR. {sys.exc_info()[1]}")
@@ -64,7 +68,8 @@ def read_from_csv(spark, file_path):
 
 def athletes_count(df_athletes):
     """
-    Считает в разрезе дисциплин сколько всего спортсменов в каждой из дисциплин принимало участие
+    Считает в разрезе дисциплин сколько всего спортсменов
+    в каждой из дисциплин принимало участие.
     """
     df_athletes_count = df_athletes.groupBy("discipline").count()
     return df_athletes_count
@@ -86,15 +91,19 @@ def join(df_discipline, df_athletes_count):
     Объединяет со сгенерированным DataFrame и выводит количество участников,
     только по тем дисциплинам, что есть в сгенерированном DataFrame.
     """
-    #Исправим названия в колонке discipline - названия будут начинаться с заглавной буквы:
+    # Исправим названия в колонке discipline -
+    # названия будут начинаться с заглавной буквы:
     df_discipline = df_discipline.select(initcap('discipline').alias('discipline'))
-    #объединяем датафреймы:
-    df_join = df_discipline.join(df_athletes_count,'discipline','left').na.drop(subset=['count'])
+    # Объединяем датафреймы:
+    df_join = df_discipline.join(df_athletes_count,'discipline','left')\
+        .na.drop(subset=['count'])
     return df_join
 
 
 def check(spark):
-    spark = sparksession()
+    """
+    Выводит данные из созданных csv и parquet файлов.
+    """
     print("Task 1:")
     spark.read.options(header='True', delimiter='\t', inferSchema='True')\
         .csv(f"{Path(sys.path[0],'data','df_discipline')}.csv").show() 
@@ -121,7 +130,4 @@ def main():
     
     
 if __name__ == '__main__':
-    main()
-
-
-    
+    main()  
