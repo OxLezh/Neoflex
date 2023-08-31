@@ -47,7 +47,7 @@ def write_to_csv(df_discipline, file_path):
         * первая строка содержит название колонок.
     """
     df_discipline.coalesce(1).write.mode("overwrite").options(header='True', delimiter='\t').csv(f"{file_path}.csv")
-    print("success")
+    print("write_to_csv - success")
     
 
 def read_from_csv(spark, file_path):
@@ -61,6 +61,7 @@ def read_from_csv(spark, file_path):
     except:
         print(f"ERROR. {sys.exc_info()[1]}")
 
+
 def athletes_count(df_athletes):
     """
     Считает в разрезе дисциплин сколько всего спортсменов в каждой из дисциплин принимало участие
@@ -68,13 +69,14 @@ def athletes_count(df_athletes):
     df_athletes_count = df_athletes.groupBy("discipline").count()
     return df_athletes_count
 
+
 def write_to_parquet(df_name, file_path):
     """
     Cохраняет данные в формате parquet.
     """
     try:
         df_name.write.mode("overwrite").parquet(f"{file_path}.parquet")
-        print("success")
+        print("write_to_parquet - success")
     except:
         print(f"ERROR. {sys.exc_info()[1]}")
 
@@ -89,24 +91,37 @@ def join(df_discipline, df_athletes_count):
     #объединяем датафреймы:
     df_join = df_discipline.join(df_athletes_count,'discipline','left').na.drop(subset=['count'])
     return df_join
-    
+
+
+def check(spark):
+    spark = sparksession()
+    print("Task 1:")
+    spark.read.options(header='True', delimiter='\t', inferSchema='True')\
+        .csv(f"{Path(sys.path[0],'data','df_discipline')}.csv").show() 
+    print("Task 2:")
+    spark.read.parquet(f"{Path(sys.path[0],'data','df_athletes_count')}.parquet").show() 
+    print("Task 3:")
+    spark.read.parquet(f"{Path(sys.path[0],'data','df_join')}.parquet").show() 
+
+
 def main():
     """
     Запуск программы.
     """    
     spark = sparksession()
     df_discipline = create_df_discipline(spark)
-    print("Task 1:")
-    write_to_csv(df_discipline, Path(sys.path[0],'data','f_discipline'))    
+    write_to_csv(df_discipline, Path(sys.path[0],'data','df_discipline'))    
     df_athletes = read_from_csv(spark, Path(sys.path[0],'data','Athletes'))
     if df_athletes:
-        df_athletes_count = athletes_count(df_athletes)
-        print("Task 2:")
+        df_athletes_count = athletes_count(df_athletes)       
         write_to_parquet(df_athletes_count, Path(sys.path[0],'data','df_athletes_count'))        
-        df_join = join(df_discipline, df_athletes_count)
-        print("Task 3:")
-        write_to_parquet(df_join, Path(sys.path[0],'data','df_join'))
-      
+        df_join = join(df_discipline, df_athletes_count)        
+        write_to_parquet(df_join, Path(sys.path[0],'data','df_join'))    
+        check(spark)
+    
     
 if __name__ == '__main__':
     main()
+
+
+    
