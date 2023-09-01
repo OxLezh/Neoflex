@@ -2,12 +2,10 @@ from pathlib import Path
 from pyspark.sql.functions import initcap
 from pyspark.sql import SparkSession 
 import sys
-from pathlib import Path
-
 
 def sparksession():
     """
-    Cоздает объект SparkSession для работы co Spark SQL.
+    Cоздает объект SparkSession для работы co Spark.
     """
     spark = (SparkSession
     .builder
@@ -22,7 +20,7 @@ def create_df_discipline(spark):
     Генерирует DataFrame из трёх колонок (row_id, discipline, season)
     - олимпийские дисциплины по сезонам.
         * row_id - число порядкового номера строки;
-        * discipline - наименование олимпиский дисциплины 
+        * discipline - наименование олимпийской дисциплины 
             на английском (полностью маленькими буквами);
         * season - сезон дисциплины (summer / winter);
     """
@@ -88,7 +86,7 @@ def write_to_parquet(df_name, file_path):
 
 def join(df_discipline, df_athletes_count):
     """
-    Объединяет со сгенерированным DataFrame и выводит количество участников,
+    Объединяет DataFrame и выводит количество участников,
     только по тем дисциплинам, что есть в сгенерированном DataFrame.
     """
     # Исправим названия в колонке discipline -
