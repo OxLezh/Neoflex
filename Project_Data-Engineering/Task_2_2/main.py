@@ -118,20 +118,17 @@ def input_pk(spark):
             f'Для выхода нажмите 4.\n')) 
         if pk == "4":
             return        
-        pk = pk.upper().replace(" ",'').split(",")
-        if pk == ['']:
-            print("Укажите первичные ключи.")                        
-        else:           
-            df = spark.read.options(header='True', delimiter=';', inferSchema='True')\
-                .csv(f"{Path(sys.path[0],'mirr_md_account_d')}").columns  
-            my_list = []       
-            for value_pk in pk:                              
-                if value_pk in df:                    
-                    my_list.append(value_pk) 
-                else:
-                    print("\nОШИБКА. В зеркале нет поля", f"'{value_pk}'\n")
-            if len(my_list) == len(pk):
-                return pk                    
+        pk = pk.upper().replace(" ",'').split(",")                 
+        df = spark.read.options(header='True', delimiter=';', inferSchema='True')\
+            .csv(f"{Path(sys.path[0],'mirr_md_account_d')}").columns  
+        my_list = []       
+        for value_pk in pk:                              
+            if value_pk in df:                    
+                my_list.append(value_pk) 
+            else:
+                print("\nОШИБКА. В зеркале нет поля", f"'{value_pk}'\n")
+        if len(my_list) == len(pk):
+            return pk                    
                     
 
 def create_empty_mirror(spark, path, delta_list):    
@@ -141,9 +138,8 @@ def create_empty_mirror(spark, path, delta_list):
     """
     # Получаем список файлов в папке mirr_md_account_d:
     del_list = sorted(os.listdir(f"{Path(sys.path[0],'mirr_md_account_d')}"))    
-    if del_list == []: 
-        # Копируем структуру таблицы из первой дельты:   
-        
+    if del_list == [] or del_list ==['.gitignore']: 
+        # Копируем структуру таблицы из первой дельты:           
         file_name = "".join(os.listdir(f"{path}/{delta_list[0]}/"))         
         df_mirror = spark.read.options(header='True', delimiter=';', inferSchema='True')\
             .csv(f"{Path(path,delta_list[0], file_name)}")
@@ -250,7 +246,7 @@ def main():
     engine = connect_postgreSQL() 
     if engine:         
         try:
-            path, delta_list = input_path()
+            path, delta_list = input_path()          
         except:
             return
         create_empty_mirror(spark, path, delta_list)  
@@ -273,8 +269,7 @@ def main():
                             break 
                     if keyboard_input not in [1,2,3,4]:
                             print('\nНеверный ввод.\n') 
-                    if keyboard_input ==1:
-                        
+                    if keyboard_input ==1:                        
                         сreate_table_logging(engine)                                          
                         max_delta_id = log_delta_id_last(engine, schema, table_name_log)   
                         df = merge_mirror_delta(max_delta_id, spark, path, engine, table_name, pk, delta_list)
@@ -283,10 +278,11 @@ def main():
                     if keyboard_input ==2:           
                         read_to_csv(spark)               
                     if keyboard_input ==3:  
-                        show_logs_PostgreSQL(engine, schema, table_name_log, spark)
-                                    
+                        show_logs_PostgreSQL(engine, schema, table_name_log, spark)                                    
                 print("--- %s seconds ---" % (time.time() - start_time))
 
 
 if __name__ == '__main__':
     main() 
+
+
