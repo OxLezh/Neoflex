@@ -25,10 +25,10 @@ def connect_postgreSQL():
         DB_PASSWORD=getenv("DB_PASSWORD")
         engine = create_engine(f'postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}')
         engine.connect()
-        print("\nПодключение к PostgreSQL успешно.\n") 
+        print("\nПодключение к PostgreSQL успешно.") 
         return engine  
     except:        
-        print(f'ОШИБКА соединения c PostgreSQL: \n {sys.exc_info()}\n')
+        print(f'\nОШИБКА соединения c PostgreSQL: \n {sys.exc_info()}\n')
 
 
 def сreate_table_logging(engine):
@@ -158,12 +158,11 @@ def mirror_to_parquet(spark):
     df_mirror.repartition(1).write.mode("overwrite").format("parquet").save(f"{Path(sys.path[0],'data_out')}.parquet") 
    
 
-
-def log_delta_id_last(engine, schema, table_name_log):
+def log_delta_id_last(engine, schema, table_name_log, table_name):
     """
     Возвращает id последней загруженной дельты из таблицы логов.
     """   
-    max_delta_id = pd.read_sql_query(f'select max(delta_id) from {schema}.{table_name_log}', con=engine).values[0][0]    
+    max_delta_id = pd.read_sql_query(f"select max(delta_id) from {schema}.{table_name_log} where table_name = '{table_name}'", con=engine).values[0][0]    
     if max_delta_id is None:
         return 0
     else:
@@ -201,7 +200,7 @@ def merge_mirror_delta(max_delta_id, spark, path, engine, table_name, pk, delta_
     try:
         return df
     except:
-        print("\nВсе дельты уже обработаны.\n")              
+        print("\nВсе дельты уже обработаны.")              
    
         
 def upload_to_csv(df):
@@ -219,7 +218,6 @@ def read_to_csv(spark):
     df = spark.read.options(header='True', delimiter=';', inferSchema='True')\
             .csv(f"{Path(sys.path[0],'mirr_md_account_d')}")
     df.show(50)
-
 
 
 def show_logs_PostgreSQL(engine, schema, table_name_log, spark):
@@ -244,43 +242,44 @@ def main():
     keyboard_input = 0 
     spark = Spark_Session()    
     engine = connect_postgreSQL() 
-    if engine:         
-        try:
-            path, delta_list = input_path()          
-        except:
-            return
-        create_empty_mirror(spark, path, delta_list)  
-        mirror_to_parquet(spark) 
-        table_name = input_table_name()   
-        if table_name:        
-            pk = input_pk(spark)
-            if pk:            
-                while keyboard_input !=4: 
-                    try:
-                        keyboard_input = int(input(
-                        f'\nВведите 1 - если хотите обновить зеркало таблицы {table_name} данными из дельт.\n'
-                        f'Введите 2 - если хотите открыть файл с зеркалом таблицы {table_name}.\n'
-                        f'Введите 3 - если хотите получить данные из таблицы логов.  \n'
-                        f'Введите 4  - выход: \n'))
-                    except:
-                        pass  
-                    if keyboard_input ==4:
-                            print('Конец программы.')
-                            break 
-                    if keyboard_input not in [1,2,3,4]:
-                            print('\nНеверный ввод.\n') 
-                    if keyboard_input ==1:                        
-                        сreate_table_logging(engine)                                          
-                        max_delta_id = log_delta_id_last(engine, schema, table_name_log)   
+    if engine:     
+        while keyboard_input !=4: 
+            try:
+                keyboard_input = int(input(
+                f'\nВведите 1 - если хотите обновить зеркало  данными из дельт.\n'
+                f'Введите 2 - если хотите открыть файл с зеркалом.\n'
+                f'Введите 3 - если хотите получить данные из таблицы логов.  \n'
+                f'Введите 4  - выход: \n'))
+            except:
+                pass  
+            if keyboard_input ==4:
+                    break 
+            if keyboard_input not in [1,2,3,4]:
+                    print('\nНеверный ввод.\n') 
+            if keyboard_input ==1:   
+                path, delta_list = input_path()                       
+                сreate_table_logging(engine)                                          
+                
+                create_empty_mirror(spark, path, delta_list)  
+                mirror_to_parquet(spark) 
+                table_name = input_table_name()   
+                if table_name:        
+                    pk = input_pk(spark)
+                    if pk: 
+                        max_delta_id = log_delta_id_last(engine, schema, table_name_log, table_name)  
                         df = merge_mirror_delta(max_delta_id, spark, path, engine, table_name, pk, delta_list)
                         if df is not None:  
                             upload_to_csv(df)                                                         
-                    if keyboard_input ==2:           
-                        read_to_csv(spark)               
-                    if keyboard_input ==3:  
-                        show_logs_PostgreSQL(engine, schema, table_name_log, spark)                                    
-                print("--- %s seconds ---" % (time.time() - start_time))
-
+            if keyboard_input ==2: 
+                try:          
+                    read_to_csv(spark)
+                except: 
+                    print("В зеркале нет данных.")              
+            if keyboard_input ==3:  
+                show_logs_PostgreSQL(engine, schema, table_name_log, spark)                                    
+                       
+                
+    print("--- %s seconds ---" % (time.time() - start_time))    
 
 if __name__ == '__main__':
     main() 
