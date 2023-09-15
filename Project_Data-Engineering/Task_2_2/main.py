@@ -12,7 +12,7 @@ import pandas as pd
 
 def connect_postgreSQL():
     """
-    Провека подключения к PosgreSQL
+    Провека подключения к PosgreSQL.
     """
     try:
         # Для использования переменных окружения.
@@ -33,7 +33,7 @@ def connect_postgreSQL():
 
 def сreate_table_logging(engine):
     """
-    Создание таблицы логов.
+    Создание таблицу логов в PostgreSQL.
     """
     with engine.connect() as conn:          
         conn.execute(text(f"""create table if not exists logs.etl_spark(
@@ -47,7 +47,7 @@ def сreate_table_logging(engine):
 
 def logging(status, engine, delta_id, table_name):
     """
-    Загрузка данных в таблицу логов.
+    Загрузка данных в таблицу логов в PostgreSQL. 
     """   
     with engine.connect() as conn:             
         conn.execute(text(f"""insert into logs.etl_spark(status, delta_id, table_name)
@@ -87,7 +87,7 @@ def input_path():
                 else:
                     return path, delta_list
             except:
-                print("\nВведен некорректный путь.\n")
+                print("\nВведен некорректный путь.")
                 
         
 def input_table_name():
@@ -213,7 +213,7 @@ def upload_to_csv(df):
      
 def read_to_csv(spark):
     """
-    Отображает данные из зеркала.
+    Отображает данные зеркала из файла csv.
     """       
     df = spark.read.options(header='True', delimiter=';', inferSchema='True')\
             .csv(f"{Path(sys.path[0],'mirr_md_account_d')}")
@@ -229,7 +229,7 @@ def show_logs_PostgreSQL(engine, schema, table_name_log, spark):
         table_log = spark.createDataFrame(table_log)   
         table_log.show(50, False) 
     else:
-        print("\nДанные в таблице логов отсутствуют.\n")  
+        print("\nДанные в таблице логов отсутствуют.")  
 
 
 def main():
@@ -246,7 +246,7 @@ def main():
         while keyboard_input !=4: 
             try:
                 keyboard_input = int(input(
-                f'\nВведите 1 - если хотите обновить зеркало  данными из дельт.\n'
+                f'\nВведите 1 - если хотите обновить зеркало данными из дельт.\n'
                 f'Введите 2 - если хотите открыть файл с зеркалом.\n'
                 f'Введите 3 - если хотите получить данные из таблицы логов.  \n'
                 f'Введите 4  - выход: \n'))
