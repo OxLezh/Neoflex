@@ -12,7 +12,7 @@ import pandas as pd
 
 def connect_postgreSQL():
     """
-    Провека подключения к PosgreSQL.
+    Проверяет подключение к PosgreSQL.
     """
     try:
         # Для использования переменных окружения.
@@ -33,7 +33,7 @@ def connect_postgreSQL():
 
 def сreate_table_logging(engine):
     """
-    Создание таблицу логов в PostgreSQL.
+    Создает таблицу логов в PostgreSQL.
     """
     with engine.connect() as conn:          
         conn.execute(text(f"""create table if not exists logs.etl_spark(
@@ -47,7 +47,7 @@ def сreate_table_logging(engine):
 
 def logging(status, engine, delta_id, table_name):
     """
-    Загрузка данных в таблицу логов в PostgreSQL. 
+    Загружает данные в таблицу логов в PostgreSQL. 
     """   
     with engine.connect() as conn:             
         conn.execute(text(f"""insert into logs.etl_spark(status, delta_id, table_name)
@@ -70,7 +70,7 @@ def Spark_Session():
 
 def input_path():
     """
-    Получает от пользователя путь к папке data_deltas и проверяет его корректность
+    Получает от пользователя путь к папке data_deltas и проверяет его корректность.
     """
     path = ''
     while path is not True:
